@@ -31,4 +31,10 @@ export default defineConfig({
    * Defaults to "./database/migrations"
    */
   migrationsDir: "./database/migrations",
+
+  /**
+   * (Optional) Custom Databases or Client instance.
+   * Useful for legacy self-hosted Appwrite instances or custom client setups.
+   * databases: new Databases(customClient),
+   */
 });

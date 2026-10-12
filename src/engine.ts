@@ -15,19 +15,31 @@ export class MigrationEngine {
   private initialized: boolean = false;
 
   constructor(customConfig?: Partial<MigrateConfig>) {
-    if (customConfig && customConfig.endpoint && customConfig.projectId && customConfig.apiKey) {
+    if (
+      customConfig &&
+      (customConfig.databases ||
+        (customConfig.endpoint && customConfig.projectId && customConfig.apiKey))
+    ) {
       this.applyConfig(customConfig as MigrateConfig);
     }
   }
 
   private applyConfig(cfg: MigrateConfig) {
     this.config = cfg;
-    this.client = new Client()
-      .setEndpoint(cfg.endpoint)
-      .setProject(cfg.projectId)
-      .setKey(cfg.apiKey);
-      
-    this.databases = new Databases(this.client);
+    if (cfg.databases) {
+      this.databases = cfg.databases;
+      this.client = (cfg.databases as any).client || cfg.client;
+    } else if (cfg.client) {
+      this.client = cfg.client;
+      this.databases = new Databases(this.client);
+    } else {
+      this.client = new Client()
+        .setEndpoint(cfg.endpoint!)
+        .setProject(cfg.projectId!)
+        .setKey(cfg.apiKey!);
+      this.databases = new Databases(this.client);
+    }
+
     this.migrationsDir = path.resolve(process.cwd(), cfg.migrationsDir || "./database/migrations");
     this.dbId = cfg.databaseId || "";
     this.initialized = true;
@@ -36,9 +48,12 @@ export class MigrationEngine {
   async ensureInitialized() {
     if (!this.initialized) {
       const resolved = await resolveConfig(process.cwd(), this.config);
-      if (!resolved.endpoint || !resolved.projectId || !resolved.apiKey) {
+      if (
+        !resolved.databases &&
+        (!resolved.endpoint || !resolved.projectId || !resolved.apiKey)
+      ) {
         throw new Error(
-          "Missing Appwrite credentials. Please configure endpoint, projectId, and apiKey via appwrite-migrate.config.ts, environment variables, or engine constructor."
+          "Missing Appwrite credentials. Please configure endpoint, projectId, and apiKey via appwrite-migrate.config.ts, environment variables, or pass a custom databases instance."
         );
       }
       this.applyConfig(resolved);
@@ -59,6 +74,48 @@ export class MigrationEngine {
     }
   }
 
+  private async safeCreateStringAttribute(
+    dbId: string,
+    collId: string,
+    key: string,
+    size: number,
+    required: boolean
+  ) {
+    try {
+      // Modern SDK (v18+) named parameters
+      await (this.databases.createStringAttribute as any)({
+        databaseId: dbId,
+        collectionId: collId,
+        key,
+        size,
+        required,
+      });
+    } catch {
+      // Fallback for legacy SDKs / positional parameter overloads
+      await (this.databases.createStringAttribute as any)(dbId, collId, key, size, required);
+    }
+  }
+
+  private async safeCreateDatetimeAttribute(
+    dbId: string,
+    collId: string,
+    key: string,
+    required: boolean
+  ) {
+    try {
+      // Modern SDK (v18+) named parameters
+      await (this.databases.createDatetimeAttribute as any)({
+        databaseId: dbId,
+        collectionId: collId,
+        key,
+        required,
+      });
+    } catch {
+      // Fallback for legacy SDKs / positional parameter overloads
+      await (this.databases.createDatetimeAttribute as any)(dbId, collId, key, required);
+    }
+  }
+
   async setup() {
     await this.ensureDatabase();
     try {
@@ -67,9 +124,9 @@ export class MigrationEngine {
       if (e.code === 404) {
         console.log("Setting up _appwrite_migrations collection...");
         await this.databases.createCollection(this.dbId, MIGRATIONS_COLLECTION, 'Appwrite Migrations');
-        await this.databases.createStringAttribute({ databaseId: this.dbId, collectionId: MIGRATIONS_COLLECTION, key: 'versionId', size: 50, required: true });
-        await this.databases.createStringAttribute({ databaseId: this.dbId, collectionId: MIGRATIONS_COLLECTION, key: 'name', size: 255, required: true });
-        await this.databases.createDatetimeAttribute({ databaseId: this.dbId, collectionId: MIGRATIONS_COLLECTION, key: 'appliedAt', required: true });
+        await this.safeCreateStringAttribute(this.dbId, MIGRATIONS_COLLECTION, 'versionId', 50, true);
+        await this.safeCreateStringAttribute(this.dbId, MIGRATIONS_COLLECTION, 'name', 255, true);
+        await this.safeCreateDatetimeAttribute(this.dbId, MIGRATIONS_COLLECTION, 'appliedAt', true);
         // Wait a bit for attributes to be provisioned
         await new Promise(r => setTimeout(r, 2000));
       } else {

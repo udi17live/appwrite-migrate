@@ -24,14 +24,14 @@ Managing schema evolutions, collections, attributes, and indexes across developm
 ## 📦 Installation
 
 ```bash
-npm install --save-dev appwrite-migrate node-appwrite
+npm install --save-dev appwrite-migrate
 # or
-pnpm add -D appwrite-migrate node-appwrite
+pnpm add -D appwrite-migrate
 # or
-yarn add -D appwrite-migrate node-appwrite
+yarn add -D appwrite-migrate
 ```
 
-> **Note**: `node-appwrite` (v14.0.0+) is a peer dependency.
+> **Zero hassle**: `node-appwrite` is bundled and re-exported. No need to manage separate SDK dependencies!
 
 ---
 
@@ -74,8 +74,7 @@ npx appwrite-migrate create -n create_users_collection
 This generates a timestamped migration file in `./database/migrations/`:
 
 ```typescript
-import { Databases, ID } from "node-appwrite";
-import { Migration } from "appwrite-migrate";
+import { Migration, Databases, ID } from "appwrite-migrate";
 
 export const migration: Migration = {
   metadata: {

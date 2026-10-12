@@ -94,11 +94,16 @@ export async function resolveConfig(
       ? "./database/migrations"
       : "./migrations");
 
+  const client = customConfig?.client || fileConfig?.client;
+  const databases = customConfig?.databases || fileConfig?.databases;
+
   return {
     endpoint,
     projectId,
     apiKey,
     databaseId,
     migrationsDir,
+    client,
+    databases,
   };
 }

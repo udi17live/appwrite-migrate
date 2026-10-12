@@ -39,14 +39,11 @@
   "author": "udi17live",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "^16.4.7"
-  },
-  "peerDependencies": {
-    "node-appwrite": ">=14.0.0"
+    "dotenv": "^16.4.7",
+    "node-appwrite": "^26.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
-    "node-appwrite": "^26.2.0",
     "tsup": "^8.3.6",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"

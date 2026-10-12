@@ -1,8 +1,7 @@
 import { MigrationMetadata } from "./types";
 
 export function generateTemplate(metadata: MigrationMetadata): string {
-  return `import { Databases, ID } from "node-appwrite";
-import { Migration } from "appwrite-migrate";
+  return `import { Migration, Databases, ID } from "appwrite-migrate";
 
 export const migration: Migration = {
   metadata: {
