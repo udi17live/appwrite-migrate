@@ -1,4 +1,4 @@
-import { Databases } from "node-appwrite";
+import { Databases, Client } from "node-appwrite";
 
 export interface MigrationMetadata {
   /** Unique 12-char hex identifier for this revision */
@@ -23,15 +23,19 @@ export interface Migration {
 
 export interface MigrateConfig {
   /** Appwrite instance endpoint URL, e.g. https://cloud.appwrite.io/v1 */
-  endpoint: string;
+  endpoint?: string;
   /** Appwrite Project ID */
-  projectId: string;
+  projectId?: string;
   /** Appwrite Server API Key (requires databases read/write permissions) */
-  apiKey: string;
+  apiKey?: string;
   /** Target Appwrite Database ID. If empty or omitted, auto-detects the first database */
   databaseId?: string;
   /** Path to migrations folder relative to project root. Defaults to "./database/migrations" */
   migrationsDir?: string;
+  /** Optional custom Client instance */
+  client?: Client;
+  /** Optional custom Databases instance (e.g. for custom or legacy self-hosted Appwrite versions) */
+  databases?: Databases;
 }
 
 /**
