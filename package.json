@@ -1,0 +1,54 @@
+{
+  "name": "appwrite-migrate",
+  "version": "0.1.0",
+  "description": "A database migration tool and CLI for Appwrite",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "appwrite-migrate": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "appwrite",
+    "migration",
+    "migrations",
+    "database",
+    "schema",
+    "cli"
+  ],
+  "author": "udi17live",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  },
+  "peerDependencies": {
+    "node-appwrite": ">=14.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "node-appwrite": "^26.2.0",
+    "tsup": "^8.3.6",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
